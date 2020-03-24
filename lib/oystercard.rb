@@ -1,6 +1,6 @@
 class Oystercard
 
-  attr_reader :balance, :last_station, :exit_station, :journeys
+  attr_reader :balance, :last_station, :journeys
 
   STARTING_BALANCE = 10
   CARD_LIMIT = 90
@@ -8,7 +8,6 @@ class Oystercard
   def initialize(balance = STARTING_BALANCE)
     @balance = balance
     @last_station = nil
-    @exit_station = nil
     @journeys = []
   end
 
