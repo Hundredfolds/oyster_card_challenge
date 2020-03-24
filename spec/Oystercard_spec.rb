@@ -4,6 +4,7 @@ describe Oystercard do
   let(:card) { Oystercard.new }
   let(:new_card) { Oystercard.new(50) }
   let(:entry_station) {double :entry_station}
+  let(:exit_station) {double :exit_station}
 
   describe 'balance' do
     it "should respond to balance" do
@@ -34,47 +35,62 @@ describe Oystercard do
     end
   end
   describe 'touching in/out/hokeykokey' do
+    context 'touches in' do
+      before do
+        card.touch_in(entry_station)
+      end
+      it "Touch in updates your status in the system to true" do
+        expect(card.in_journey?).to eq(true)
+      end
+      it "should return true if you are in the system" do
+        expect(card.in_journey?).to eq(true)
+      end
+      it "should deduct 1 from the balance on touch out" do
+        expect { subject.touch_out }.to change{ subject.balance }.by(-1)
+      end
+      it "touching out should wipe the entry station" do
+        expect { card.touch_out }.to change { card.last_station }.from(entry_station).to(nil)
+      end
+      it "should record the exit station" do
+        card.touch_out("Waterloo")
+        card.touch_in(entry_station)
+        expect { card.touch_out(exit_station) }.to change { card.journeys[-1][:exit] }.from("Waterloo").to(exit_station)
+      end
+      it "touching in and out creates one journey" do
+        expect { card.touch_out(exit_station) }.to change { card.journeys.length }.from(0).to(1)
+      end
+    end
+    context 'touches out' do
+      before do
+        card.touch_out(exit_station)
+      end
+      it "Touch out updates your status in the system to false" do
+        expect(card.in_journey?).to eq(false)
+      end
+      it "should return false if you are out the system" do
+        expect(card.in_journey?).to eq(false)
+      end
+    end
     it " should be able to touch into system" do
       expect(subject).to respond_to(:touch_in).with(1).argument
-    end
-    it "Touch in updates your status in the system to true" do
-      card.touch_in(entry_station)
-      expect(card.in_journey?).to eq(true)
-    end
+    end  
     it " should be able to touch out of system" do
       expect(card).to respond_to(:touch_out)
-    end
-    it "Touch out updates your status in the system to false" do
-      card.touch_out
-      expect(card.in_journey?).to eq(false)
-    end
+    end 
     it "should be able to let you know if it's in a journey" do
       expect(card.in_journey?).to eq(true).or eq(false)
-    end
-    it "should return true if you are in the system" do
-      card.touch_in
-      expect(card.in_journey?).to eq(true)
-    end
-    it "should return false if you are out the system" do
-      card.touch_out
-      expect(card.in_journey?).to eq(false)
     end
     it " should not be able to touch in with a balance less than £1" do
       low_cash_card = Oystercard.new(0)
       expect { low_cash_card.touch_in }.to raise_error "outta cash"
-    end
-    it "should deduct 1 from the balance on touch out" do
-      subject.touch_in
-      expect { subject.touch_out }.to change{ subject.balance }.by(-1)
     end
   end
   describe "station interactions" do
     it "touching in should store the entry station" do
       expect { card.touch_in(entry_station) }.to change { card.last_station }.to(entry_station)
     end
-    it "touching out should wipe the entry station" do
-      card.touch_in(entry_station)
-      expect { card.touch_out }.to change { card.last_station }.from(entry_station).to(nil)
+    it 'checks card has an empty list of journeys by default' do
+      expect(card.journeys[-1]).to eq nil
     end
   end
 end
