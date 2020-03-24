@@ -57,6 +57,10 @@ describe Oystercard do
       card.touch_out
       expect(card.in_journey?).to eq(false)
     end
+    it " should not be able to touch in with a balance less than £1" do
+      low_cash_card = Oystercard.new(0)
+      expect { low_cash_card.touch_in }.to raise_error "outta cash"
+    end
   end
 end
 

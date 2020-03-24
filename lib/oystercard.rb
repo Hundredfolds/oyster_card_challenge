@@ -2,7 +2,7 @@ class Oystercard
 
   attr_reader :balance, :in_system
 
-  STARTING_BALANCE = 0
+  STARTING_BALANCE = 10
   CARD_LIMIT = 90
 
   def initialize(balance = STARTING_BALANCE)
@@ -20,6 +20,7 @@ class Oystercard
   end
 
   def touch_in
+    raise "outta cash" if @balance <= 0
     @in_system = true
   end
 
