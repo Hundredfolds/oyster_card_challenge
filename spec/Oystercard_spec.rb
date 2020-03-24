@@ -3,6 +3,8 @@ require './lib/oystercard'
 describe Oystercard do
   let(:card) { Oystercard.new }
   let(:new_card) { Oystercard.new(50) }
+  let(:entry_station) {double :entry_station}
+
   describe 'balance' do
     it "should respond to balance" do
       expect(card).to respond_to(:balance)
@@ -33,18 +35,18 @@ describe Oystercard do
   end
   describe 'touching in/out/hokeykokey' do
     it " should be able to touch into system" do
-      expect(card).to respond_to(:touch_in)
+      expect(subject).to respond_to(:touch_in).with(1).argument
     end
     it "Touch in updates your status in the system to true" do
-      card.touch_in
-      expect(card.in_system).to eq(true)
+      card.touch_in(entry_station)
+      expect(card.in_journey?).to eq(true)
     end
     it " should be able to touch out of system" do
       expect(card).to respond_to(:touch_out)
     end
     it "Touch out updates your status in the system to false" do
       card.touch_out
-      expect(card.in_system).to eq(false)
+      expect(card.in_journey?).to eq(false)
     end
     it "should be able to let you know if it's in a journey" do
       expect(card.in_journey?).to eq(true).or eq(false)
@@ -63,7 +65,16 @@ describe Oystercard do
     end
     it "should deduct 1 from the balance on touch out" do
       subject.touch_in
-      expect {subject.touch_out}.to change{subject.balance}.by(-1)
+      expect { subject.touch_out }.to change{ subject.balance }.by(-1)
+    end
+  end
+  describe "station interactions" do
+    it "touching in should store the entry station" do
+      expect { card.touch_in(entry_station) }.to change { card.last_station }.to(entry_station)
+    end
+    it "touching out should wipe the entry station" do
+      card.touch_in(entry_station)
+      expect { card.touch_out }.to change { card.last_station }.from(entry_station).to(nil)
     end
   end
 end
