@@ -22,12 +22,12 @@ describe Oystercard do
       card_limit = 90
       expect { card.top_up(card_limit + 1)  }.to raise_error "you cannot top up #{card_limit + 1} as it brings your card over the limit"
     end
-    it "should respond to deduct" do
-      expect(card).to respond_to(:deduct)
-    end
+    #it "should respond to deduct" do
+    #  expect(card).to respond_to(:deduct)
+    #end
     it "balance should be decreased by deduct" do
       y = new_card.balance
-      new_card.deduct
+      new_card.send(:deduct)
       expect(new_card.balance).to be < (y)
     end
   end
@@ -60,6 +60,10 @@ describe Oystercard do
     it " should not be able to touch in with a balance less than £1" do
       low_cash_card = Oystercard.new(0)
       expect { low_cash_card.touch_in }.to raise_error "outta cash"
+    end
+    it "should deduct 1 from the balance on touch out" do
+      subject.touch_in
+      expect {subject.touch_out}.to change{subject.balance}.by(-1)
     end
   end
 end

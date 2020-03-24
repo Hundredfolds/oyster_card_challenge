@@ -15,21 +15,24 @@ class Oystercard
     @balance += num
   end
 
-  def deduct
-    @balance -= 1
-  end
-
   def touch_in
     raise "outta cash" if @balance <= 0
     @in_system = true
   end
 
   def touch_out
+    deduct
     @in_system = false
   end
 
   def in_journey?
     @in_system
+  end
+
+  private
+
+  def deduct
+    @balance -= 1
   end
 
 end
